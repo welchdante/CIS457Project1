@@ -9,13 +9,13 @@ class Client():
 	def create_socket(self):
 		return socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 
-	def get_file(self, message):
+	def get_file(self, filename):
 		print('Connecting to server: ', self.host, self.port)
 		print('\n------------------------------------------------\n')
-		print('Sending message:   ', message)
+		print('Sending filename:   ', filename)
 		print('\n------------------------------------------------\n')
-		
-		self.send_message(message)
+
+		self.send_filename(filename)
 		with open("test.jpg", 'wb') as f:
 		    print('File opened')
 		    print('Receiving data...')
@@ -27,14 +27,14 @@ class Client():
 		f.close()
 		self.end_connection()
 
-	def send_message(self, message):
-		return self.sock.sendto(message.encode(), (self.host, self.port))
+	def send_filename(self, filename):
+		return self.sock.sendto(filename.encode(), (self.host, self.port))
 
 	def end_connection(self):
 		self.sock.close()
 
 host = input('Which host would you like the client to connect to?\n')
 port = int(input('Which port would you like the client to connect to?\n'))
-message = input('What message would you like to send to the server?\n')
+filename = input('What file would you like to get from the server?\n')
 client = Client(host, port)
-client.get_file(message)
+client.get_file(filename)
