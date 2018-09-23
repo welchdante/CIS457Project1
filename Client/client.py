@@ -1,37 +1,56 @@
 import socket
+import errno
+import time
 
 class Client():
-	def __init__(self, host, port):
-		self.host = host
-		self.port = port
-		self.sock = self.create_socket()
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.sock = self.create_socket()
 
-	def create_socket(self):
-		return socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+    def create_socket(self):
+        return socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 
-	def get_file(self, filename):
-		print('Connecting to server: ', self.host, self.port)
-		print('\n------------------------------------------------\n')
-		print('Sending filename:   ', filename)
-		print('\n------------------------------------------------\n')
+    def get_file(self, filename):
+        print('Connecting to server: ', self.host, self.port)
+        print('\n------------------------------------------------\n')
+        print('Sending filename:   ', filename)
+        print('\n------------------------------------------------\n')
 
-		self.send_filename(filename)
-		with open("test.jpg", 'wb') as f:
-		    print('File opened')
-		    print('Receiving data...')
-		    while True:
-		        data = self.sock.recv(1)
-		        if not data:
-		            break
-		        f.write(data)
-		f.close()
-		self.end_connection()
+        self.send_filename(filename)
+        with open(filename, 'wb') as f:
+            print('File opened')
+            print('Receiving data...')
 
-	def send_filename(self, filename):
-		return self.sock.sendto(filename.encode(), (self.host, self.port))
+            #makes the client eventually close when there is no data
+            self.sock.setblocking(0)
+            begin = time.time()
+            timeout = 2
 
-	def end_connection(self):
-		self.sock.close()
+            while True:
+                # wait if you have no data
+                if time.time() - begin > timeout:
+                    break
+                #recieve something
+                try:
+                    data = self.sock.recv(1024)
+                    if data: 
+                        f.write(data)
+                        begin = time.time()
+                    else: 
+                        time.sleep(0.01)
+
+                except socket.error as err:
+                    pass
+
+        f.close()
+        self.end_connection()
+
+    def send_filename(self, filename):
+        return self.sock.sendto(filename.encode(), (self.host, self.port))
+
+    def end_connection(self):
+        self.sock.close()
 
 host = input('Which host would you like the client to connect to?\n')
 port = int(input('Which port would you like the client to connect to?\n'))
