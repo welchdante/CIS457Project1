@@ -36,6 +36,7 @@ class Client():
                     data = self.sock.recv(1024)
                     if data: 
                         f.write(data)
+                        self.send_filename("client got data");
                         begin = time.time()
                     else: 
                         time.sleep(0.01)
