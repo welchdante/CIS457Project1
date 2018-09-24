@@ -1,5 +1,8 @@
+#!/usr/bin/python3
+
 import socket
 import os.path
+import sys
 import time
 
 class Server():
@@ -103,8 +106,18 @@ class Server():
         else:
             return time.time() - self.start_time >= self.duration
 
-port = int(input('Which port would you like the server to listen on?\n'))
-server = Server(port)
-server.listen()
+if __name__ == '__main__':
+
+	if len(sys.argv) == 2:
+		port = sys.argv[1]
+	else:
+		port = input('Which port would you like the server to listen on?\n')
+
+	if not port.isdigit() and not 1 <= int(port) <= 65535:
+		print(port, 'is not a valid port number.\nShutting Down.')
+		sys.exit()
+
+	server = Server(int(port))
+	server.listen()
 
         
