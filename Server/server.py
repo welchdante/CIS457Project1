@@ -28,54 +28,54 @@ class Server():
             # Open file
             if self.file_exists(filename):
                 f = open(filename,'rb')
+
+                # Add all packets and number them
+                packets = []
+                num = 0
+                file_contents = f.read(1020)
+                while file_contents:
+                    packets.append(self.make_packet(num, file_contents))
+                    num += 1
+                    file_contents = f.read(1020)
+                f.close()
+
+                num_packets = len(packets)
+                print('Number packets: ', num_packets)
+                next_frame = 0
+                base = 0
+                window = self.set_window(num_packets, base)
+
+                # Send the packet
+                while base < num_packets:
+                    # Send all packets within the window
+                    while next_frame < base + window and next_frame < num_packets:
+                        print('Sending packet ', next_frame)
+                        self.send_data_to_socket(packets[next_frame], client_host)
+                        next_frame += 1
+                    # Wait till time is up or acknowledgement
+                    self.start_timer()
+                    while self.timer_running() and not self.timer_timeout():
+                        data = self.sock.recvfrom(1024)
+                        if data:
+                            ack = data[0].decode()
+                            print('Got acknowledgement ', ack)
+                            if int(ack) >= base:
+                                base = int(ack) + 1
+                                self.stop_timer()
+
+                    if self.timer_timeout():
+                        self.stop_timer()
+                        next_frame = base
+                    else:
+                        print('Shifting window.')
+                        window_size = self.set_window(num_packets, base)
+                    time.sleep(1)
+                    print('Listening on: ' + self.host + ':' + str(self.port))
+
             else:
                 print('File does not exist.')
-
-            # Add all packets and number them
-            packets = []
-            num = 0
-            file_contents = f.read(1020)
-            while file_contents:
-                packets.append(self.make_packet(num, file_contents))
-                num += 1
-                file_contents = f.read(1020)
-            f.close()
-
-            num_packets = len(packets)
-            print('Number packets: ', num_packets)
-            next_frame = 0
-            base = 0
-            window = self.set_window(num_packets, base)
-
-            # Send the packet
-            while base < num_packets:
-                # Send all packets within the window
-                while next_frame < base + window and next_frame < num_packets:
-                    print('Sending packet ', next_frame)
-                    self.send_data_to_socket(packets[next_frame], client_host)
-                    next_frame += 1
-                # Wait till time is up or acknowledgement
-                self.start_timer()
-                while self.timer_running() and not self.timer_timeout():
-                    data = self.sock.recvfrom(1024)
-                    if data:
-                        ack = data[0].decode()
-                        print('Got acknowledgement ', ack)
-                        if int(ack) >= base:
-                            base = int(ack) + 1
-                            self.stop_timer()
-
-                if self.timer_timeout():
-                    self.stop_timer()
-                    next_frame = base
-                else:
-                    print('Shifting window.')
-                    window_size = self.set_window(num_packets, base)
-            #self.sock.recvfrom(1024)
-            time.sleep(1)
-            print('Listening on: ' + self.host + ':' + str(self.port))
-            print('\n------------------------------------------------\n')   
-
+                print('\n------------------------------------------------\n') 
+            
     def send_data_to_socket(self, payload, host):
         self.sock.sendto(payload, host)
 
