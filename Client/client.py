@@ -1,12 +1,6 @@
-#!/usr/bin/python3
-
 import socket
 import errno
 import time
-import sys
-import os
-
-from IPy import IP
 
 class Client():
     def __init__(self, host, port):
@@ -19,11 +13,14 @@ class Client():
 
     def get_file(self, filename):
         print('Connecting to server: ', self.host, self.port)
-        print('\nSending filename:   ', filename)
+        print('\n------------------------------------------------\n')
+        print('Sending filename:   ', filename)
+        print('\n------------------------------------------------\n')
 
         self.send_filename(filename)
         with open(filename, 'wb') as f:
-            print('Checking for response...')
+            print('File opened')
+            print('Receiving data...')
 
             #makes the client eventually close when there is no data
             self.sock.setblocking(0)
@@ -60,13 +57,7 @@ class Client():
                 except socket.error as err:
                     pass
 
-        # Quick fix for writing file that doesn't exist
-        if os.stat(filename).st_size == 0:
-            print("File doesn't exist on server.")
-            os.remove(filename)
-        else:
-            print("Recieved data.")
-
+        f.close()
         self.end_connection()
 
     def send_filename(self, filename):
@@ -83,24 +74,8 @@ class Client():
         num = int.from_bytes(packet[0:4], byteorder = 'little', signed = True)
         return num, packet[4:]
 
-if __name__ == '__main__':
-
-    host = input('Which host would you like the client to connect to?\n')
-    
-    try: # IP address error checking.
-        IP(host)
-    except Exception as e:
-        print(host, "is not a valid IP address.\nShutting Down.")
-        sys.exit()
-
-    port = input('Which port would you like the client to connect to?\n')
-
-    # Port number error checking.
-    if not port.isdigit() and not 1 <= int(port) <= 65535:
-        print(port, 'is not a valid port number.\nShutting Down.')
-        sys.exit()
-
-    filename = input('What file would you like to get from the server?\n')
-    client = Client(host, int(port))
-    client.get_file(filename)
-
+host = input('Which host would you like the client to connect to?\n')
+port = int(input('Which port would you like the client to connect to?\n'))
+filename = input('What file would you like to get from the server?\n')
+client = Client(host, port)
+client.get_file(filename)
