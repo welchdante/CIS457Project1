@@ -61,7 +61,10 @@ class Server():
                         if int(ack) >= base:
                             base = int(ack) + 1
                             self.stop_timer()
-
+                        else:
+                            base = int(ack)
+                            next_frame = base
+                            self.stop_timer()
                 if self.timer_timeout():
                     self.stop_timer()
                     next_frame = base
@@ -69,7 +72,7 @@ class Server():
                     print('Shifting window.')
                     window_size = self.set_window(num_packets, base)
             #self.sock.recvfrom(1024)
-            time.sleep(1)
+            time.sleep(2)
             print('Listening on: ' + self.host + ':' + str(self.port))
             print('\n------------------------------------------------\n')   
 
