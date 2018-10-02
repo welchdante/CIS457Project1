@@ -2,6 +2,8 @@ import socket
 import os.path
 import time
 import re
+import hashlib
+import sys
 
 class Server():
     def __init__(self, port):
@@ -34,9 +36,11 @@ class Server():
             num = 0
             file_contents = f.read(1020)
             while file_contents:
-                packets.append(self.make_packet(num, file_contents))
+                md5_returned = hashlib.md5(file_contents).digest()
+                packets.append(self.make_packet(num, md5_returned, file_contents))
                 num += 1
                 file_contents = f.read(1020)
+                #print(sys.getsizeof(md5_returned))
             f.close()
 
             num_packets = len(packets)
@@ -86,9 +90,12 @@ class Server():
     def set_window(self, num_packets, base):
         return min(self.window_size, num_packets - base)
 
-    def make_packet(self, acknum, data=b''):
+    def make_packet(self, acknum, hashed, data=b''):
         ackbytes = acknum.to_bytes(4, byteorder='little', signed=True)
-        return ackbytes + data
+        #hashbytes = hashed.digest()
+        #print(sys.getsizeof(hashed))
+        print(hashed)
+        return ackbytes + hashed + data
 
     def start_timer(self):
         if self.start_time == -1:

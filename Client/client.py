@@ -2,6 +2,7 @@ import socket
 import errno
 import time
 import re
+import hashlib
 
 class Client():
     def __init__(self, host, port):
@@ -35,13 +36,16 @@ class Client():
                 break
             #recieve something
             try:
-                packet = self.sock.recv(1024)
+                #packet = self.sock.recv(1024)
+                packet = self.sock.recv(1105)
                 if packet: 
-                    num, data = self.extract(packet)
+                    num, hashed, data = self.extract(packet)
+                    print(hashed)
+                    datahash = hashlib.md5(data).digest()
                     print("Got packet ", num)
 
                     # Send acknlowedgement to the sender
-                    if num == expected:
+                    if (num == expected) and (hashed == datahash):
                         print("Sending acknlowedgement ", expected)
                         self.send_filename(str(expected))
                         expected += 1
@@ -95,7 +99,8 @@ class Client():
 
     def extract(self, packet):
         num = int.from_bytes(packet[0:4], byteorder = 'little', signed = True)
-        return num, packet[4:]
+        hashdata = packet[4:20]
+        return num, hashdata, packet[20:]
 
 # get host
 host = input('Which host would you like the client to connect to?\n')
