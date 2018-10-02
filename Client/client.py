@@ -1,6 +1,8 @@
 import socket
 import errno
 import time
+import re
+import hashlib
 
 class Client():
     def __init__(self, host, port):
@@ -34,12 +36,16 @@ class Client():
                 break
             #recieve something
             try:
-                packet = self.sock.recv(1024)
+                #packet = self.sock.recv(1024)
+                packet = self.sock.recv(1105)
                 if packet: 
-                    num, data = self.extract(packet)
+                    num, hashed, data = self.extract(packet)
+                    print(hashed)
+                    datahash = hashlib.md5(data).digest()
                     print("Got packet ", num)
 
                     # Send acknlowedgement to the sender
+                    #if (num == expected) and (hashed == datahash):
                     if num == expected:
                         print("Sending acknlowedgement ", expected)
                         self.send_filename(str(expected))
@@ -63,7 +69,7 @@ class Client():
 
         packets = self.handle_duplicates(packets)
 
-        write file
+        # write file
         with open(filename, 'wb') as f:
             print('File opened')
             for p in packets:
@@ -94,10 +100,26 @@ class Client():
 
     def extract(self, packet):
         num = int.from_bytes(packet[0:4], byteorder = 'little', signed = True)
-        return num, packet[4:]
+        hashdata = packet[4:20]
+        return num, hashdata, packet[20:]
 
+# get host
 host = input('Which host would you like the client to connect to?\n')
-port = int(input('Which port would you like the client to connect to?\n'))
+while True:
+    if re.match('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', host):
+        break
+    else:
+        host = input('Which host would you like the client to connect to?\n')
+
+# get port
+port = input('Which port would you like the client to connect to?\n')
+while True:
+    if re.match('[0-9]{4}', port):
+        break
+    else:
+        port = input('Which port would you like the client to connect to?\n')
+
+# get filename and connect
 filename = input('What file would you like to get from the server?\n')
-client = Client(host, port)
+client = Client(host, int(port))
 client.get_file(filename)
