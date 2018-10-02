@@ -1,6 +1,7 @@
 import socket
 import errno
 import time
+import re
 
 class Client():
     def __init__(self, host, port):
@@ -63,7 +64,7 @@ class Client():
 
         packets = self.handle_duplicates(packets)
 
-        write file
+        # write file
         with open(filename, 'wb') as f:
             print('File opened')
             for p in packets:
@@ -105,14 +106,14 @@ while True:
         host = input('Which host would you like the client to connect to?\n')
 
 # get port
-port = int(input('Which port would you like the client to connect to?\n'))
+port = input('Which port would you like the client to connect to?\n')
 while True:
-    if re.match('^-?\\d+$', port):
+    if re.match('[0-9]{4}', port):
         break
     else:
-        port = int(input('Which port would you like the client to connect to?\n'))
+        port = input('Which port would you like the client to connect to?\n')
 
 # get filename and connect
 filename = input('What file would you like to get from the server?\n')
-client = Client(host, port)
+client = Client(host, int(port))
 client.get_file(filename)

@@ -1,6 +1,7 @@
 import socket
 import os.path
 import time
+import re
 
 class Server():
     def __init__(self, port):
@@ -107,12 +108,12 @@ class Server():
             return time.time() - self.start_time >= self.duration
 
 # get port
-port = int(input('Which port would you like the client to connect to?\n'))
+port = input('Which port would you like the client to connect to?\n')
 while True:
-    if re.match('^-?\\d+$', port):
+    if re.match('[0-9]{4}', port):
         break
     else:
-        port = int(input('Which port would you like the client to connect to?\n'))
+        port = input('Which port would you like the client to connect to?\n')
 
-server = Server(port)
+server = Server(int(port))
 server.listen()
