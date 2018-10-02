@@ -92,9 +92,6 @@ class Server():
 
     def make_packet(self, acknum, hashed, data=b''):
         ackbytes = acknum.to_bytes(4, byteorder='little', signed=True)
-        #hashbytes = hashed.digest()
-        #print(sys.getsizeof(hashed))
-        print(hashed)
         return ackbytes + hashed + data
 
     def start_timer(self):

@@ -45,7 +45,8 @@ class Client():
                     print("Got packet ", num)
 
                     # Send acknlowedgement to the sender
-                    if (num == expected) and (hashed == datahash):
+                    #if (num == expected) and (hashed == datahash):
+                    if num == expected:
                         print("Sending acknlowedgement ", expected)
                         self.send_filename(str(expected))
                         expected += 1
