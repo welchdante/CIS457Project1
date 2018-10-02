@@ -96,8 +96,23 @@ class Client():
         num = int.from_bytes(packet[0:4], byteorder = 'little', signed = True)
         return num, packet[4:]
 
+# get host
 host = input('Which host would you like the client to connect to?\n')
+while True:
+    if re.match('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', host):
+        break
+    else:
+        host = input('Which host would you like the client to connect to?\n')
+
+# get port
 port = int(input('Which port would you like the client to connect to?\n'))
+while True:
+    if re.match('^-?\\d+$', port):
+        break
+    else:
+        port = int(input('Which port would you like the client to connect to?\n'))
+
+# get filename and connect
 filename = input('What file would you like to get from the server?\n')
 client = Client(host, port)
 client.get_file(filename)

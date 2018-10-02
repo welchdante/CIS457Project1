@@ -106,6 +106,13 @@ class Server():
         else:
             return time.time() - self.start_time >= self.duration
 
-port = int(input('Which port would you like the server to listen on?\n'))
+# get port
+port = int(input('Which port would you like the client to connect to?\n'))
+while True:
+    if re.match('^-?\\d+$', port):
+        break
+    else:
+        port = int(input('Which port would you like the client to connect to?\n'))
+
 server = Server(port)
 server.listen()
